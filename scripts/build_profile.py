@@ -188,11 +188,11 @@ def banner() -> str:
 <circle class="dot" cx="{ex}" cy="{ey}" r="6" fill="#f2804f"/>
 {t(1060, 64, "forecast", 14, "#f2b597", anchor="middle")}
 {t(70, 118, "David Skaff", 58, "#ffffff", bold=True)}
-{t(72, 166, "Data Science · Analytics Engineering · Experimentation", 22, "#cfe3fb")}
+{t(72, 166, "Data Science · Machine Learning · Data & Analytics Engineering", 20, "#cfe3fb")}
 {t(72, 214, "MSc Business Analytics, Ivey Business School", 19, "#9dbde3")}
-{t(72, 244, "Data Analyst Intern, Super.com (2026) · Ontario, Canada", 19, "#9dbde3")}
+{t(72, 244, "Data Analyst Intern, Super.com (2026)", 19, "#9dbde3")}
 """
-    return svg(W, H, body, "David Skaff: Data Science, Analytics Engineering, Experimentation")
+    return svg(W, H, body, "David Skaff: Data Science, Machine Learning, Data and Analytics Engineering")
 
 
 def badge(label: str, value: str, accent: str) -> str:
@@ -266,7 +266,7 @@ def build(stats: dict) -> None:
     (ASSETS / "banner.svg").write_text(banner())
     (ASSETS / "badge-linkedin.svg").write_text(badge("LinkedIn", "davidskaff1", "#0a66c2"))
     (ASSETS / "badge-available.svg").write_text(badge("Available", "December 2026", "#1a7f37"))
-    (ASSETS / "badge-location.svg").write_text(badge("Work", "Canada & U.S. (TN)", "#d9541f"))
+    (ASSETS / "badge-location.svg").write_text(badge("Work", "U.S. (TN-eligible)", "#d9541f"))
 
     cb, em = stats["citibike"], stats["email"]
     cb_footer = (f"Data through {fmt_date(cb['data_end'])} · retrains monthly" if cb.get("data_end")
