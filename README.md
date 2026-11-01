@@ -1,9 +1,9 @@
-<img src="assets/banner.svg" alt="David Skaff: Data Science, Analytics Engineering, Experimentation" width="100%">
+<img src="assets/banner.svg" alt="David Skaff: Data Science, Machine Learning, Data and Analytics Engineering" width="100%">
 
 <p align="center">
   <a href="https://www.linkedin.com/in/davidskaff1/"><img src="assets/badge-linkedin.svg" alt="LinkedIn: davidskaff1" height="30"></a>&nbsp;
   <img src="assets/badge-available.svg" alt="Available: December 2026" height="30">&nbsp;
-  <img src="assets/badge-location.svg" alt="Work: Canada and U.S. (TN)" height="30">
+  <img src="assets/badge-location.svg" alt="Work: U.S. (TN-eligible)" height="30">
 </p>
 
 ### About me
@@ -12,9 +12,11 @@ I'm finishing an **MSc in Business Analytics at Ivey Business School** (December
 **Data Analyst Intern at Super.com**, where I shipped production dbt models, built an Airflow → Snowflake
 pipeline, and traced conversion drops through funnel and cohort analysis.
 
-I like problems where the answer changes a decision: how much demand to plan for, who to target, and whether an
-experiment really worked. I'm looking for **data science, analytics engineering and data analyst roles starting
-December 2026**, in Canada or the U.S. (Canadian citizen, TN-eligible).
+I enjoy working across the whole data lifecycle: building reliable pipelines and warehouse models, turning data
+into metrics and analysis people can trust, and training and shipping machine learning models that improve real
+decisions. I'm looking for **data analyst, data engineer, data scientist, machine learning engineer and analytics
+engineer roles in the U.S., starting December 2026**. As a Canadian citizen, I'm eligible for a TN visa, so U.S.
+employers can hire me without H-1B sponsorship.
 
 ### Featured projects
 
