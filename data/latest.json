@@ -1,10 +1,10 @@
 {
   "citibike": {
-    "wape": 0.085,
-    "error_cut": 0.44805194805194803,
+    "wape": 0.0853,
+    "error_cut": 0.4457439896036387,
     "rides": 160324554,
-    "coverage80": 0.87,
-    "data_end": null
+    "coverage80": 0.8667,
+    "data_end": "2026-09-30"
   },
   "email": {
     "customers": 64000,
