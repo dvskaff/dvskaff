@@ -1,4 +1,4 @@
-<img src="assets/banner.svg" alt="David Skaff: Data Science, Analytics Engineering" width="100%">
+<img src="assets/banner.svg" alt="David Skaff: Data Science, Analytics Engineering, Experimentation" width="100%">
 
 <p align="center">
   <a href="https://www.linkedin.com/in/davidskaff1/"><img src="assets/badge-linkedin.svg" alt="LinkedIn: davidskaff1" height="30"></a>&nbsp;
