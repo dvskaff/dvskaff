@@ -1,0 +1,38 @@
+name: Refresh profile
+
+# Redraws the project cards from each project's latest published results.
+on:
+  schedule:
+    - cron: "37 13 * * 1" # Mondays, 13:37 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/**", ".github/workflows/refresh.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Rebuild cards from live project results
+        run: python scripts/build_profile.py
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets data README.md
+          if ! git diff --staged --quiet; then
+            git commit -m "Refresh profile cards"
+            git pull --rebase
+            git push
+          fi
