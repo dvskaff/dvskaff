@@ -48,4 +48,4 @@ them. When the Citi Bike model retrains each month, its card updates on its own.
 
 </details>
 
-<sub>Cards last refreshed: <!-- REFRESHED -->Nov 1, 2026<!-- /REFRESHED --></sub>
+<sub>Cards last refreshed: <!-- REFRESHED -->Nov 2, 2026<!-- /REFRESHED --></sub>
