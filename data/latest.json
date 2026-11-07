@@ -3,7 +3,6 @@
     "wape": 0.0853,
     "error_cut": 0.4457439896036387,
     "rides": 160324554,
-    "coverage80": 0.8667,
     "data_end": "2026-09-30"
   },
   "email": {
@@ -12,41 +11,41 @@
     "profit_gain": 0.16586567941561348
   },
   "ontario": {
-    "mape": 2.71,
-    "naive_mape": 6.52,
-    "error_cut": 0.5843558282208589,
+    "mape": 2.7093275956681366,
+    "naive_mape": 6.52196839154147,
+    "error_cut": 0.5845843719233687,
     "data_end": "2026-11-05"
   },
   "filings": {
-    "recall5": 0.4867,
+    "recall5": 0.4866666666666667,
     "bm25_recall5": 0.34,
-    "correct_rag": 0.2733,
+    "correct_rag": 0.2733333333333333,
     "correct_closed": 0.14,
     "documents": 84
   },
   "mortgage": {
-    "auc": 0.847,
+    "auc": 0.8466239150717525,
     "applications": 348927,
     "group": "Black",
-    "odds_raw": 2.89,
-    "odds_adj": 1.76
+    "odds_raw": 2.8864013418688828,
+    "odds_adj": 1.7595890004511656
   },
   "flights": {
     "flights": 14094455,
-    "late_after_60": 0.86,
-    "on_time": 0.773,
+    "late_after_60": 0.8568058695312816,
+    "on_time": 0.7725904276183896,
     "data_end": "2026-08"
   },
   "chicago311": {
-    "warehouse": 4906117,
-    "requests_12m": 811732,
-    "median_days": 2.9,
+    "warehouse": 4897705,
+    "requests_12m": 811485,
+    "median_days": 2.894571759259259,
     "tests": 74,
-    "data_end": "2026-11-06"
+    "data_end": "2026-11-04"
   },
   "community": {
-    "came_back": 0.291,
-    "fast_answer_pts": 0.058,
+    "came_back": 0.29090651958704566,
+    "fast_answer_pts": 0.05792707620774468,
     "contributions": 1223160,
     "data_end": "2024-03-31"
   }
