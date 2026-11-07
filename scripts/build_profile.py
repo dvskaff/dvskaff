@@ -42,18 +42,23 @@ THEMES = {
                  violet="#9d8cf2"),
 }
 
-TOOLKIT = [
+TOOLKIT = [  # matches the skills on my resume; tools are added here once a project uses them
     ("Languages", ["SQL", "Python", "R", "JavaScript", "HTML", "CSS", "VBA"]),
-    ("Machine learning", ["scikit-learn", "XGBoost", "LightGBM", "PyTorch", "TensorFlow/Keras", "Hugging Face",
-                          "Optuna", "MLflow", "SHAP"]),
-    ("Statistics & causal", ["statsmodels", "statsforecast", "SciPy", "EconML", "A/B testing", "CUPED",
-                             "Uplift modeling", "Forecasting"]),
-    ("Data engineering", ["Snowflake", "dbt", "Apache Airflow", "Databricks", "PySpark", "BigQuery", "DuckDB",
-                          "PostgreSQL", "Fivetran", "Hightouch", "Polars", "pandas"]),
-    ("Analytics & BI", ["Tableau", "Power BI", "Looker", "Amplitude", "Excel", "Plotly", "D3.js", "Matplotlib"]),
-    ("Engineering", ["Git", "GitHub Actions", "GitHub Pages", "GitLab", "pytest", "Flask", "SQLAlchemy", "Jupyter",
-                     "Claude Code", "MCP"]),
+    ("Machine learning & AI", ["scikit-learn", "XGBoost", "LightGBM", "PyTorch", "TensorFlow/Keras",
+                               "Hugging Face Transformers", "llama.cpp", "Optuna", "SHAP", "Fairlearn"]),
+    ("Statistics & causal", ["statsmodels", "statsforecast", "SciPy", "lifelines", "EconML", "A/B testing",
+                             "CUPED", "Uplift modeling", "Survival analysis", "Forecasting"]),
+    ("MLOps & serving", ["MLflow", "Evidently", "ONNX Runtime", "Docker", "FastAPI", "Flask",
+                         "GitHub Actions (CI/CD)"]),
+    ("Data engineering", ["PySpark", "Spark SQL", "Delta Lake", "Apache Airflow", "dbt", "Databricks", "Snowflake",
+                          "BigQuery", "PostgreSQL", "DuckDB", "SQLite", "Parquet", "SQLAlchemy", "Fivetran",
+                          "Hightouch"]),
+    ("Data & visualization", ["pandas", "Polars", "NumPy", "Matplotlib", "Seaborn", "Plotly", "hvPlot", "D3.js",
+                              "Leaflet", "Folium", "BeautifulSoup", "Splinter"]),
+    ("Analytics & BI", ["Tableau", "Power BI", "Looker", "Amplitude", "Excel", "Smartsheet"]),
+    ("Engineering", ["Git", "GitHub", "GitLab", "pytest", "Jupyter", "Claude Code", "MCP"]),
 ]
+
 
 
 # --------------------------------------------------------------------------- helpers
@@ -179,9 +184,9 @@ def P(key, repo, file, stats, roles, **card):
 # The grid shows the projects in this order, two per row. "card" is filled from the live numbers in build().
 PROJECTS = [
     P("ontario", "ontario-demand-forecasting", "results.json", ontario_stats, ["ML Engineer"],
-      tag="MLOPS", color="blue", title="Ontario Electricity Demand: Production ML",
-      blurb="How much power will Ontario need tomorrow, hour by hour? Forecasts with uncertainty, a model "
-            "registry with a promotion gate, drift monitoring and an API in Docker.",
+      tag="MLOPS", color="blue", title="Ontario Electricity Demand: Production ML System",
+      blurb="How much power will Ontario need tomorrow, hour by hour? Daily forecasts with a model registry, "
+            "drift monitoring and an API.",
       chips=["LightGBM", "MLflow", "ONNX", "FastAPI", "Evidently"], link="Live forecast"),
     P("filings", "filings-rag-eval", "results.json", filings_stats, ["ML Engineer"],
       tag="LLM · RAG", color="violet", title="Financial Filings Q&A: RAG & LLM Evaluation",
@@ -189,12 +194,12 @@ PROJECTS = [
             "instead of guessing? Measured on FinanceBench.",
       chips=["llama.cpp", "Embeddings", "BM25", "FastAPI", "Docker"], link="Live evaluation"),
     P("mortgage", "mortgage-fair-lending-model", "results.json", mortgage_stats, ["Data Scientist"],
-      tag="CREDIT RISK · FAIRNESS", color="orange", title="Mortgage Denial Model & Fair-Lending Audit",
+      tag="CREDIT RISK · FAIRNESS", color="orange", title="Mortgage Denial Modeling & Fair-Lending Audit",
       blurb="Which mortgage applications get denied, and are some groups denied more after accounting for "
             "credit factors? Public HMDA data for Georgia.",
       chips=["LightGBM", "Scorecard", "Fairlearn", "SHAP", "statsmodels"], link="Live dashboard"),
     P("email", "email-campaign-uplift", "results.json", email_stats, ["Data Analyst", "Data Scientist"],
-      tag="CAUSAL INFERENCE", color="orange", title="Email Experiment & Uplift Modeling",
+      tag="CAUSAL INFERENCE", color="orange", title="Email Campaign Experiment & Uplift Modeling",
       blurb="Did a marketing email work, for whom, and who should get one next? A/B testing, causal-forest "
             "uplift models and a targeting simulator.",
       chips=["EconML", "LightGBM", "SHAP", "statsmodels", "DuckDB"], link="Live report & simulator"),
@@ -205,13 +210,13 @@ PROJECTS = [
       chips=["PySpark", "Delta Lake", "Airflow", "pytest", "Plotly"], link="Live dashboard"),
     P("chicago311", "chicago-311-warehouse", "results.json", chicago311_stats,
       ["Analytics Engineer", "Data Engineer"],
-      tag="ANALYTICS ENGINEERING", color="green", title="Chicago 311 Analytics Warehouse",
-      blurb="How fast does Chicago resolve 311 service requests, by department and neighborhood? A tested dbt "
-            "warehouse on DuckDB, loaded incrementally every day.",
+      tag="ANALYTICS ENGINEERING", color="green", title="Chicago 311 Analytics Warehouse: dbt & DuckDB",
+      blurb="How fast does Chicago resolve 311 service requests, by department and neighborhood? Tested and "
+            "loaded daily.",
       chips=["dbt", "DuckDB", "SQL", "Python", "Plotly"], link="Live dashboard"),
     P("community", "community-retention-analytics", "results.json", community_stats,
       ["Data Analyst", "Analytics Engineer"],
-      tag="PRODUCT ANALYTICS", color="violet", title="What Makes Newcomers Stick?",
+      tag="PRODUCT ANALYTICS", color="violet", title="Community Retention & Product Analytics",
       blurb="Which first experiences make new members of a Q&A community come back? Retention, cohorts and "
             "survival analysis on Stack Exchange data, modeled in dbt.",
       chips=["dbt", "DuckDB", "lifelines", "Cohorts", "SQL"], link="Live dashboard"),

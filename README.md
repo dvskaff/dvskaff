@@ -25,19 +25,19 @@ data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pa
 
 <!-- PROJECTS:START -->
 <p align="center">
-<a href="https://dvskaff.github.io/ontario-demand-forecasting/"><img src="assets/card-ontario.svg" width="49%" alt="Ontario Electricity Demand: Production ML project card"></a>
+<a href="https://dvskaff.github.io/ontario-demand-forecasting/"><img src="assets/card-ontario.svg" width="49%" alt="Ontario Electricity Demand: Production ML System project card"></a>
 <a href="https://dvskaff.github.io/filings-rag-eval/"><img src="assets/card-filings.svg" width="49%" alt="Financial Filings Q&amp;A: RAG &amp; LLM Evaluation project card"></a>
 </p>
 <p align="center">
-<a href="https://dvskaff.github.io/mortgage-fair-lending-model/"><img src="assets/card-mortgage.svg" width="49%" alt="Mortgage Denial Model &amp; Fair-Lending Audit project card"></a>
-<a href="https://dvskaff.github.io/email-campaign-uplift/"><img src="assets/card-email.svg" width="49%" alt="Email Experiment &amp; Uplift Modeling project card"></a>
+<a href="https://dvskaff.github.io/mortgage-fair-lending-model/"><img src="assets/card-mortgage.svg" width="49%" alt="Mortgage Denial Modeling &amp; Fair-Lending Audit project card"></a>
+<a href="https://dvskaff.github.io/email-campaign-uplift/"><img src="assets/card-email.svg" width="49%" alt="Email Campaign Experiment &amp; Uplift Modeling project card"></a>
 </p>
 <p align="center">
 <a href="https://dvskaff.github.io/flight-delay-lakehouse/"><img src="assets/card-flights.svg" width="49%" alt="Flight Delay Lakehouse: PySpark &amp; Delta Lake project card"></a>
-<a href="https://dvskaff.github.io/chicago-311-warehouse/"><img src="assets/card-chicago311.svg" width="49%" alt="Chicago 311 Analytics Warehouse project card"></a>
+<a href="https://dvskaff.github.io/chicago-311-warehouse/"><img src="assets/card-chicago311.svg" width="49%" alt="Chicago 311 Analytics Warehouse: dbt &amp; DuckDB project card"></a>
 </p>
 <p align="center">
-<a href="https://dvskaff.github.io/community-retention-analytics/"><img src="assets/card-community.svg" width="49%" alt="What Makes Newcomers Stick? project card"></a>
+<a href="https://dvskaff.github.io/community-retention-analytics/"><img src="assets/card-community.svg" width="49%" alt="Community Retention &amp; Product Analytics project card"></a>
 <a href="https://dvskaff.github.io/citibike-demand-forecasting/"><img src="assets/card-citibike.svg" width="49%" alt="NYC Citi Bike Demand Forecasting project card"></a>
 </p>
 <!-- PROJECTS:END -->
@@ -47,19 +47,19 @@ data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pa
 <!-- ROLES:START -->
 | Project | Best fit for | Links |
 |---|---|---|
-| **Ontario Electricity Demand: Production ML** | ML Engineer | [Live forecast](https://dvskaff.github.io/ontario-demand-forecasting/) · [Code](https://github.com/dvskaff/ontario-demand-forecasting) |
+| **Ontario Electricity Demand: Production ML System** | ML Engineer | [Live forecast](https://dvskaff.github.io/ontario-demand-forecasting/) · [Code](https://github.com/dvskaff/ontario-demand-forecasting) |
 | **Financial Filings Q&A: RAG & LLM Evaluation** | ML Engineer | [Live evaluation](https://dvskaff.github.io/filings-rag-eval/) · [Code](https://github.com/dvskaff/filings-rag-eval) |
-| **Mortgage Denial Model & Fair-Lending Audit** | Data Scientist | [Live dashboard](https://dvskaff.github.io/mortgage-fair-lending-model/) · [Code](https://github.com/dvskaff/mortgage-fair-lending-model) |
-| **Email Experiment & Uplift Modeling** | Data Analyst, Data Scientist | [Live report & simulator](https://dvskaff.github.io/email-campaign-uplift/) · [Code](https://github.com/dvskaff/email-campaign-uplift) |
+| **Mortgage Denial Modeling & Fair-Lending Audit** | Data Scientist | [Live dashboard](https://dvskaff.github.io/mortgage-fair-lending-model/) · [Code](https://github.com/dvskaff/mortgage-fair-lending-model) |
+| **Email Campaign Experiment & Uplift Modeling** | Data Analyst, Data Scientist | [Live report & simulator](https://dvskaff.github.io/email-campaign-uplift/) · [Code](https://github.com/dvskaff/email-campaign-uplift) |
 | **Flight Delay Lakehouse: PySpark & Delta Lake** | Data Engineer | [Live dashboard](https://dvskaff.github.io/flight-delay-lakehouse/) · [Code](https://github.com/dvskaff/flight-delay-lakehouse) |
-| **Chicago 311 Analytics Warehouse** | Analytics Engineer, Data Engineer | [Live dashboard](https://dvskaff.github.io/chicago-311-warehouse/) · [Code](https://github.com/dvskaff/chicago-311-warehouse) |
-| **What Makes Newcomers Stick?** | Data Analyst, Analytics Engineer | [Live dashboard](https://dvskaff.github.io/community-retention-analytics/) · [Code](https://github.com/dvskaff/community-retention-analytics) |
+| **Chicago 311 Analytics Warehouse: dbt & DuckDB** | Analytics Engineer, Data Engineer | [Live dashboard](https://dvskaff.github.io/chicago-311-warehouse/) · [Code](https://github.com/dvskaff/chicago-311-warehouse) |
+| **Community Retention & Product Analytics** | Data Analyst, Analytics Engineer | [Live dashboard](https://dvskaff.github.io/community-retention-analytics/) · [Code](https://github.com/dvskaff/community-retention-analytics) |
 | **NYC Citi Bike Demand Forecasting** | Data Scientist | [Live dashboard](https://dvskaff.github.io/citibike-demand-forecasting/) · [Code](https://github.com/dvskaff/citibike-demand-forecasting) |
 <!-- ROLES:END -->
 
 ### Toolkit
 
-<img src="assets/toolkit.svg" alt="Toolkit: SQL, Python, R, scikit-learn, XGBoost, LightGBM, PyTorch, TensorFlow, EconML, Snowflake, dbt, Airflow, Databricks, Tableau, Power BI, GitHub Actions and more" width="100%">
+<img src="assets/toolkit.svg" alt="Toolkit: SQL, Python, R, scikit-learn, XGBoost, LightGBM, PyTorch, Hugging Face Transformers, llama.cpp, EconML, Fairlearn, MLflow, Evidently, ONNX Runtime, Docker, FastAPI, PySpark, Delta Lake, Apache Airflow, dbt, Databricks, Snowflake, BigQuery, DuckDB, Tableau, Power BI, GitHub Actions and more" width="100%">
 
 <details>
 <summary><b>How this profile updates itself</b></summary>
@@ -73,4 +73,4 @@ updates on its own; if a site is briefly unavailable, its card keeps the last go
 
 </details>
 
-<sub>Cards last refreshed: <!-- REFRESHED -->Nov 7, 2026<!-- /REFRESHED --></sub>
+<sub>Cards last refreshed: <!-- REFRESHED -->Nov 6, 2026<!-- /REFRESHED --></sub>
