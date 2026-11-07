@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.linkedin.com/in/davidskaff1/"><img src="assets/badge-linkedin.svg" alt="LinkedIn: davidskaff1" height="30"></a>&nbsp;
-  <img src="assets/badge-available.svg" alt="Available: December 2026" height="30">&nbsp;
+  <img src="assets/badge-available.svg" alt="Available: January 2027" height="30">&nbsp;
   <img src="assets/badge-location.svg" alt="Work: U.S. (TN-eligible)" height="30">
 </p>
 
@@ -15,7 +15,7 @@ pipeline, and traced conversion drops through funnel and cohort analysis.
 I enjoy working across the whole data lifecycle: building reliable pipelines and warehouse models, turning data
 into metrics and analysis people can trust, and training and shipping machine learning models that improve real
 decisions. I'm looking for **data analyst, data engineer, data scientist, machine learning engineer and analytics
-engineer roles in the U.S., starting December 2026**. As a Canadian citizen, I'm eligible for a TN visa, so U.S.
+engineer roles in the U.S., starting January 2027**. As a Canadian citizen, I'm eligible for a TN visa, so U.S.
 employers can hire me without H-1B sponsorship.
 
 ### Featured projects

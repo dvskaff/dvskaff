@@ -463,7 +463,7 @@ def build(stats: dict) -> None:
     ASSETS.mkdir(exist_ok=True)
     (ASSETS / "banner.svg").write_text(banner())
     (ASSETS / "badge-linkedin.svg").write_text(badge("LinkedIn", "davidskaff1", "#0a66c2"))
-    (ASSETS / "badge-available.svg").write_text(badge("Available", "December 2026", "#1a7f37"))
+    (ASSETS / "badge-available.svg").write_text(badge("Available", "January 2027", "#1a7f37"))
     (ASSETS / "badge-location.svg").write_text(badge("Work", "U.S. (TN-eligible)", "#d9541f"))
 
     th = THEMES[THEME]
