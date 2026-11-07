@@ -10,5 +10,44 @@
     "customers": 64000,
     "visit_lift": 0.721405,
     "profit_gain": 0.16586567941561348
+  },
+  "ontario": {
+    "mape": 2.71,
+    "naive_mape": 6.52,
+    "error_cut": 0.5843558282208589,
+    "data_end": "2026-11-05"
+  },
+  "filings": {
+    "recall5": 0.4867,
+    "bm25_recall5": 0.34,
+    "correct_rag": 0.2733,
+    "correct_closed": 0.14,
+    "documents": 84
+  },
+  "mortgage": {
+    "auc": 0.847,
+    "applications": 348927,
+    "group": "Black",
+    "odds_raw": 2.89,
+    "odds_adj": 1.76
+  },
+  "flights": {
+    "flights": 14094455,
+    "late_after_60": 0.86,
+    "on_time": 0.773,
+    "data_end": "2026-08"
+  },
+  "chicago311": {
+    "warehouse": 4906117,
+    "requests_12m": 811732,
+    "median_days": 2.9,
+    "tests": 74,
+    "data_end": "2026-11-06"
+  },
+  "community": {
+    "came_back": 0.291,
+    "fast_answer_pts": 0.058,
+    "contributions": 1223160,
+    "data_end": "2024-03-31"
   }
 }
