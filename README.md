@@ -73,4 +73,4 @@ updates on its own; if a site is briefly unavailable, its card keeps the last go
 
 </details>
 
-<sub>Cards last refreshed: <!-- REFRESHED -->Nov 7, 2026<!-- /REFRESHED --></sub>
+<sub>Cards last refreshed: <!-- REFRESHED -->Nov 6, 2026<!-- /REFRESHED --></sub>
