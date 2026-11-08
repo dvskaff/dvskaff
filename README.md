@@ -9,8 +9,9 @@
 ### About me
 
 I'm finishing an **MSc in Business Analytics at Ivey Business School** (December 2026). This summer I was a
-**Data Analyst Intern at Super.com**, where I shipped production dbt models, built an Airflow → Snowflake
-pipeline, and traced conversion drops through funnel and cohort analysis.
+**Data Analyst Intern at Super.com**, where I worked across the whole data stack: building pipelines into
+Snowflake, shipping models to the production dbt repository, and digging into conversion and retention data to
+explain what was driving the business. I finished with an A+ evaluation and a Transformative Impact Award.
 
 I enjoy working across the whole data lifecycle: building reliable pipelines and warehouse models, turning data
 into metrics and analysis people can trust, and training and shipping machine learning models that improve real
