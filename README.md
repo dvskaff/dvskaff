@@ -22,7 +22,7 @@ employers can hire me without H-1B sponsorship.
 
 ### Featured projects
 
-Eight end-to-end projects on real public data. Each one runs entirely on GitHub: tests on every push, scheduled
+Ten end-to-end projects on real public data. Each one runs entirely on GitHub: tests on every push, scheduled
 data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pages. Click a card to open it.
 
 <!-- PROJECTS:START -->
@@ -31,7 +31,11 @@ data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pa
 <a href="https://dvskaff.github.io/filings-rag-eval/"><img src="assets/card-filings.svg" width="49%" alt="Financial Filings Q&amp;A: RAG &amp; LLM Evaluation project card"></a>
 </p>
 <p align="center">
+<a href="https://dvskaff.github.io/complaint-routing-nlp/"><img src="assets/card-complaints.svg" width="49%" alt="Consumer Complaint Routing with Transformers project card"></a>
 <a href="https://dvskaff.github.io/mortgage-fair-lending-model/"><img src="assets/card-mortgage.svg" width="49%" alt="Mortgage Denial Modeling &amp; Fair-Lending Audit project card"></a>
+</p>
+<p align="center">
+<a href="https://dvskaff.github.io/congestion-pricing-impact/"><img src="assets/card-congestion.svg" width="49%" alt="NYC Congestion Pricing Impact project card"></a>
 <a href="https://dvskaff.github.io/email-campaign-uplift/"><img src="assets/card-email.svg" width="49%" alt="Email Campaign Experiment &amp; Uplift Modeling project card"></a>
 </p>
 <p align="center">
@@ -51,7 +55,9 @@ data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pa
 |---|---|---|
 | **Ontario Electricity Demand: Production ML System** | ML Engineer | [Live forecast](https://dvskaff.github.io/ontario-demand-forecasting/) · [Code](https://github.com/dvskaff/ontario-demand-forecasting) |
 | **Financial Filings Q&A: RAG & LLM Evaluation** | ML Engineer | [Live evaluation](https://dvskaff.github.io/filings-rag-eval/) · [Code](https://github.com/dvskaff/filings-rag-eval) |
+| **Consumer Complaint Routing with Transformers** | Data Scientist, ML Engineer | [Live dashboard & demo](https://dvskaff.github.io/complaint-routing-nlp/) · [Code](https://github.com/dvskaff/complaint-routing-nlp) |
 | **Mortgage Denial Modeling & Fair-Lending Audit** | Data Scientist | [Live dashboard](https://dvskaff.github.io/mortgage-fair-lending-model/) · [Code](https://github.com/dvskaff/mortgage-fair-lending-model) |
+| **NYC Congestion Pricing Impact** | Data Analyst, Data Scientist | [Live dashboard & map](https://dvskaff.github.io/congestion-pricing-impact/) · [Code](https://github.com/dvskaff/congestion-pricing-impact) |
 | **Email Campaign Experiment & Uplift Modeling** | Data Analyst, Data Scientist | [Live report & simulator](https://dvskaff.github.io/email-campaign-uplift/) · [Code](https://github.com/dvskaff/email-campaign-uplift) |
 | **Flight Delay Lakehouse: PySpark & Delta Lake** | Data Engineer | [Live dashboard](https://dvskaff.github.io/flight-delay-lakehouse/) · [Code](https://github.com/dvskaff/flight-delay-lakehouse) |
 | **Chicago 311 Analytics Warehouse: dbt & DuckDB** | Analytics Engineer, Data Engineer | [Live dashboard](https://dvskaff.github.io/chicago-311-warehouse/) · [Code](https://github.com/dvskaff/chicago-311-warehouse) |
@@ -69,10 +75,11 @@ data loads and retraining with GitHub Actions, and a live dashboard on GitHub Pa
 
 The project cards above are not screenshots. Every Monday a GitHub Action
 ([`refresh.yml`](.github/workflows/refresh.yml)) runs [`scripts/build_profile.py`](scripts/build_profile.py),
-which downloads the latest results each project publishes to GitHub Pages, redraws the eight cards as SVGs,
-rewrites the project grid and table, and commits them. When a project loads new data or retrains, its card
+which downloads the latest results each project publishes to GitHub Pages, redraws the project cards as SVGs
+(each with a small chart, map or pipeline drawn from the live numbers), rewrites the project grid and table, and
+commits them. When a project loads new data or retrains, its card
 updates on its own; if a site is briefly unavailable, its card keeps the last good numbers.
 
 </details>
 
-<sub>Cards last refreshed: <!-- REFRESHED -->Nov 7, 2026<!-- /REFRESHED --></sub>
+<sub>Cards last refreshed: <!-- REFRESHED -->Nov 8, 2026<!-- /REFRESHED --></sub>

@@ -12,6 +12,8 @@ workflow needs no installs. If a project's site is briefly unavailable, its card
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import re
 import sys
@@ -22,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from font_metrics import BOLD, CHARS, REGULAR  # noqa: E402
+from manhattan import MANHATTAN, MAP_H, MAP_W, TOLL_ZONE  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS, CACHE, README = ROOT / "assets", ROOT / "data" / "latest.json", ROOT / "README.md"
@@ -33,13 +36,13 @@ THEME = "navy"
 THEMES = {
     "navy": dict(bg="#0a1424", card="#0f1c30", border="#24374f", ink="#eef4fb", muted="#9fb3cb",
                  chip="#0a1424", chip_border="#2c4363", blue="#5aa8ff", orange="#f2804f", green="#3fcf6e",
-                 violet="#a493ff"),
+                 violet="#a493ff", base="#4b6283"),
     "light": dict(bg="#ffffff", card="#f6f8fa", border="#d0d7de", ink="#1f2328", muted="#59636e",
                   chip="#ffffff", chip_border="#d0d7de", blue="#1f6fd1", orange="#d9541f", green="#1a7f37",
-                  violet="#5a45c9"),
+                  violet="#5a45c9", base="#afb8c1"),
     "dark": dict(bg="#0d1117", card="#151b23", border="#30363d", ink="#e6edf3", muted="#9198a1",
                  chip="#0d1117", chip_border="#3d444d", blue="#4c9df5", orange="#f2804f", green="#3fb950",
-                 violet="#9d8cf2"),
+                 violet="#9d8cf2", base="#545d68"),
 }
 
 TOOLKIT = [  # matches the skills on my resume; tools are added here once a project uses them
@@ -108,18 +111,34 @@ def month(iso: str | None) -> str | None:
 
 
 # --------------------------------------------------------------------------- data
-def fetch(url: str) -> dict:
+def fetch_text(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": f"{USER}-profile-refresh"})
     with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310 (fixed https URLs)
-        return json.load(r)
+        return r.read().decode("utf-8")
+
+
+def fetch(url: str) -> dict:
+    return json.loads(fetch_text(url))
+
+
+def fetch_csv(url: str) -> list[dict]:
+    return list(csv.DictReader(io.StringIO(fetch_text(url))))
 
 
 def citibike_stats(m: dict) -> dict:
     summary = {row["model"]: row for row in m["summary"]}
     champ = m["champion"]
     baselines = [summary[n]["WAPE"] for n in ("Seasonal naive", "AutoETS", "AutoARIMA") if n in summary]
-    return {"wape": summary[champ]["WAPE"], "error_cut": 1 - summary[champ]["WAPE"] / min(baselines),
-            "rides": m["total_rides"], "data_end": m.get("data_end")}  # fmt: skip
+    out = {"wape": summary[champ]["WAPE"], "error_cut": 1 - summary[champ]["WAPE"] / min(baselines),
+           "rides": m["total_rides"], "data_end": m.get("data_end")}  # fmt: skip
+    try:  # the published 30-day forecast, drawn on the card
+        rows = [r for r in fetch_csv(site("citibike-demand-forecasting") + "data/citibike_forecast.csv")
+                if r["date"] > str(m.get("data_end"))[:10]]  # fmt: skip
+        out["forecast"] = {"dates": [r["date"] for r in rows], "yhat": [float(r["yhat"]) for r in rows],
+                           "lo": [float(r["lo_80"]) for r in rows], "hi": [float(r["hi_80"]) for r in rows]}  # fmt: skip
+    except Exception as exc:
+        print(f"WARNING: no Citi Bike forecast file ({exc!r})")
+    return out
 
 
 def email_stats(r: dict) -> dict:
@@ -135,12 +154,14 @@ def chicago311_stats(r: dict) -> dict:
     d = r["dbt"]
     return {"warehouse": r["requests_in_warehouse"], "requests_12m": r["requests"],
             "median_days": r["median_days_to_close"], "tests": d["data_tests"] + d["unit_tests"],
+            "models": d["models"], "within_7d": r["pct_closed_within_7d"],
             "data_end": str(r["data_as_of"])[:10]}  # fmt: skip
 
 
 def community_stats(r: dict) -> dict:
     fast = next(e for e in r["experience"] if e["signal"] == "first_q_answered_fast")
     return {"came_back": r["newcomer_came_back_rate"], "fast_answer_pts": fast["diff"],
+            "fast_yes": fast["rate_yes"], "fast_no": fast["rate_no"],
             "contributions": r["contributions_all_time"], "data_end": str(r["data_end"])[:10]}  # fmt: skip
 
 
@@ -153,13 +174,21 @@ def mortgage_stats(r: dict) -> dict:
 
 def flights_stats(r: dict) -> dict:
     return {"flights": r["lake"]["silver/flights"]["rows"], "late_after_60": r["late_after_60"],
-            "on_time": r["last12"]["on_time_rate"], "data_end": r["window"][1]}  # fmt: skip
+            "on_time": r["last12"]["on_time_rate"], "data_end": r["window"][1],
+            "gold_tables": sum(k.startswith("gold/") for k in r["lake"])}  # fmt: skip
 
 
 def ontario_stats(r: dict) -> dict:
     bt = r["backtest"]
-    return {"mape": bt["model"]["mape"], "naive_mape": bt["naive_week"]["mape"],
-            "error_cut": bt["improvement_vs_naive"], "data_end": r["data_end"]}  # fmt: skip
+    out = {"mape": bt["model"]["mape"], "naive_mape": bt["naive_week"]["mape"],
+           "error_cut": bt["improvement_vs_naive"], "data_end": r["data_end"]}  # fmt: skip
+    try:  # tomorrow's hourly forecast (the data behind the what-if page), drawn on the card
+        w = fetch(site("ontario-demand-forecasting") + "data/whatif.json")
+        out["forecast"] = {"day": w["target_day"], "hour_ending": w["hour_ending"],
+                           **{k: w["forecast"][k] for k in ("p10", "p50", "p90")}}  # fmt: skip
+    except Exception as exc:
+        print(f"WARNING: no Ontario hourly forecast ({exc!r})")
+    return out
 
 
 def filings_stats(r: dict) -> dict:
@@ -167,6 +196,20 @@ def filings_stats(r: dict) -> dict:
     return {"recall5": r["retrieval_best"]["recall@5"], "bm25_recall5": r["retrieval_bm25"]["recall@5"],
             "correct_rag": g["RAG (single filing)"]["correct"],
             "correct_closed": g["Closed book (no retrieval)"]["correct"], "documents": r["documents"]}  # fmt: skip
+
+
+def complaints_stats(r: dict) -> dict:
+    best = r["scores"]["Ensemble: fine-tuned + TF-IDF"]
+    return {"accuracy": best["accuracy"], "macro_f1": best["macro_f1"], "auto_share": best["routing"]["auto_share"],
+            "auto_accuracy": best["routing"]["auto_accuracy"], "test": r["run"]["test"],
+            "products": len(r["run"]["labels"])}  # fmt: skip
+
+
+def congestion_stats(r: dict) -> dict:
+    sp, bus = r["speed"], r.get("bus") or {}
+    return {"first": sp["first"]["effect"], "first_year": sp["first"]["year"], "trend": sp["trend"]["effect"],
+            "bus_first": (bus.get("first") or {}).get("effect"), "rides": r["rides"],
+            "data_end": r["data_through"]}  # fmt: skip
 
 
 def site(repo: str) -> str:
@@ -193,13 +236,23 @@ PROJECTS = [
       blurb="Can an AI answer analysts' questions about SEC filings, cite its sources, and say \"I don't know\" "
             "instead of guessing? Measured on FinanceBench.",
       chips=["llama.cpp", "Embeddings", "BM25", "FastAPI", "Docker"], link="Live evaluation"),
+    P("complaints", "complaint-routing-nlp", "results.json", complaints_stats, ["Data Scientist", "ML Engineer"],
+      tag="NLP · TRANSFORMERS", color="violet", title="Consumer Complaint Routing with Transformers",
+      blurb="Which team should handle each consumer complaint, and when should a person step in? A fine-tuned, "
+            "calibrated transformer.",
+      chips=["PyTorch", "Transformers", "ONNX", "BERTopic", "scikit-learn"], link="Live dashboard & demo"),
     P("mortgage", "mortgage-fair-lending-model", "results.json", mortgage_stats, ["Data Scientist"],
       tag="CREDIT RISK · FAIRNESS", color="orange", title="Mortgage Denial Modeling & Fair-Lending Audit",
       blurb="Which mortgage applications get denied, and are some groups denied more after accounting for "
             "credit factors? Public HMDA data for Georgia.",
       chips=["LightGBM", "Scorecard", "Fairlearn", "SHAP", "statsmodels"], link="Live dashboard"),
+    P("congestion", "congestion-pricing-impact", "results.json", congestion_stats, ["Data Analyst", "Data Scientist"],
+      tag="CAUSAL INFERENCE", color="orange", title="NYC Congestion Pricing Impact",
+      blurb="Did New York's Manhattan toll make traffic faster? Difference-in-differences on a billion taxi and "
+            "ride-hail trips, checked against MTA bus speeds.",
+      chips=["DuckDB", "statsmodels", "Plotly", "SQL", "Parquet"], link="Live dashboard & map"),
     P("email", "email-campaign-uplift", "results.json", email_stats, ["Data Analyst", "Data Scientist"],
-      tag="CAUSAL INFERENCE", color="orange", title="Email Campaign Experiment & Uplift Modeling",
+      tag="A/B TESTING · UPLIFT", color="orange", title="Email Campaign Experiment & Uplift Modeling",
       blurb="Did a marketing email work, for whom, and who should get one next? A/B testing, causal-forest "
             "uplift models and a targeting simulator.",
       chips=["EconML", "LightGBM", "SHAP", "statsmodels", "DuckDB"], link="Live report & simulator"),
@@ -238,7 +291,9 @@ def load(offline: bool) -> dict:
             raw = fetch(p["url"])
             if raw.get("synthetic"):
                 raise ValueError("site shows synthetic test data")
-            out[p["key"]] = p["stats_fn"](raw)
+            fresh = p["stats_fn"](raw)
+            # an optional extra file (a forecast to draw) that couldn't be read keeps its last good version
+            out[p["key"]] = {**{k: v for k, v in cached.get(p["key"], {}).items() if k not in fresh}, **fresh}
             print(f"fetched {p['key']}: {out[p['key']]}")
         except Exception as exc:  # keep the last good numbers if a site is briefly unavailable or changed
             print(f"WARNING: could not refresh {p['key']} ({exc!r}); keeping cached values")
@@ -246,46 +301,101 @@ def load(offline: bool) -> dict:
     return out
 
 
-def card_numbers(key: str, s: dict) -> tuple[list[tuple[str, str]], str]:
-    """The two headline numbers on each card, and its footer (how it stays up to date)."""
+def card_content(key: str, s: dict) -> dict:
+    """What each card shows below its description: one headline number, one small visual that fits the project
+    (a forecast curve, a comparison, a pipeline, a map...), and a footer saying how it stays up to date.
+
+    Visuals: ("bars", caption, [(label, value, value_text, highlight)]), ("line", caption, series),
+    ("split", caption, share, left_lines, right_lines), ("odds", caption, raw, adjusted),
+    ("pipeline", caption, [(name, detail)]), ("map", caption). Every number comes from the live results."""
+    def bars(caption, rows):
+        return ("bars", caption, rows)
+
     if key == "ontario":
-        return ([(f"{s['mape']:.1f}%", "forecast error (MAPE) for the next day"),
-                 (f"−{s['error_cut']:.0%}", f"error vs. same hour last week ({s['naive_mape']:.1f}%)")],
-                f"Forecasts daily, retrains weekly · data through {fmt_date(s['data_end'])}")
+        fc = s.get("forecast")
+        if fc:
+            visual = ("line", f"Forecast for {fmt_date(fc['day'])[:-6]}, hour by hour",
+                      {"y": fc["p50"], "lo": fc["p10"], "hi": fc["p90"], "start": "1 a.m.", "end": "midnight",
+                       "peak": lambda i, v: f"peak {v / 1000:.1f} GW"})  # fmt: skip
+        else:
+            visual = bars("Forecast error (MAPE)", [("LightGBM model", s["mape"], f"{s['mape']:.1f}%", True),
+                                                    ("Same hour last week", s["naive_mape"], f"{s['naive_mape']:.1f}%",
+                                                     False)])  # fmt: skip
+        return {"headline": (f"{s['mape']:.1f}%", f"forecast error (MAPE), {s['error_cut']:.0%} below the same hour "
+                                                  f"last week ({s['naive_mape']:.1f}%)"),
+                "visual": visual,
+                "footer": f"Forecasts daily, retrains weekly · data through {fmt_date(s['data_end'])}"}
     if key == "filings":
-        return ([(f"{s['recall5']:.0%}", f"of questions find the evidence page in the top 5 (BM25: "
-                                         f"{s['bm25_recall5']:.0%})"),
-                 (f"{s['correct_rag']:.0%}", f"answered correctly with retrieval vs. {s['correct_closed']:.0%} "
-                                             "without")],
-                f"{s['documents']} SEC filings · re-evaluated on every code change")
+        return {"headline": (f"{s['recall5']:.0%}", f"of questions find the evidence page in the top 5 (BM25: "
+                                                    f"{s['bm25_recall5']:.0%})"),
+                "visual": bars("Answered correctly", [("With retrieval (RAG)", s["correct_rag"],
+                                                       f"{s['correct_rag']:.0%}", True),
+                                                      ("Without retrieval", s["correct_closed"],
+                                                       f"{s['correct_closed']:.0%}", False)]),
+                "footer": f"{s['documents']} SEC filings · re-evaluated on every code change"}
+    if key == "complaints":
+        return {"headline": (f"{s['accuracy']:.0%}", f"routed to the right team across {s['products']} products "
+                                                     f"(macro-F1 {s['macro_f1']:.2f})"),
+                "visual": ("split", "Routing policy", s["auto_share"],
+                           [f"{s['auto_share']:.0%} auto-routed", f"{s['auto_accuracy']:.0%} of them correct"],
+                           [f"{1 - s['auto_share']:.0%} to a person", "with two suggestions"]),
+                "footer": f"Tested on {s['test'] / 1000:.0f}K recent complaints · quality-gated on every run"}
     if key == "mortgage":
-        return ([(f"{s['auc']:.2f}", f"ROC AUC on a held-out year ({s['applications'] / 1000:.0f}K applications)"),
-                 (f"{s['odds_raw']:.1f}×", f"{s['group']} vs. non-Hispanic White denial odds "
-                                           f"({s['odds_adj']:.1f}× after credit factors)")],
-                "Checks for new HMDA data monthly")
+        return {"headline": (f"{s['auc']:.2f}", f"ROC AUC on a held-out year ({s['applications'] / 1000:.0f}K "
+                                                "applications)"),
+                "visual": ("odds", f"{s['group']} vs. White denial odds", s["odds_raw"], s["odds_adj"]),
+                "footer": "Checks for new HMDA data monthly"}
+    if key == "congestion":
+        return {"headline": (f"{s['first']:+.1%}", f"faster traffic inside the toll zone in its first year, "
+                                                   f"{s['first_year']} ({s['trend']:+.0%} trend-adjusted)"),
+                "visual": ("map", "Manhattan · toll zone in blue"),
+                "footer": f"{s['rides'] / 1e9:.1f}B trips · updated weekly · data through {month(s['data_end'])}"}
     if key == "email":
-        return ([(f"+{s['visit_lift']:.0%}", f"site visits from the best email ({s['customers'] / 1000:.0f}K "
-                                            "customers)"),
-                 (f"+{s['profit_gain']:.0%}", "est. profit from targeting vs. emailing everyone")],
-                "Analysis reruns on every push")
+        return {"headline": (f"+{s['visit_lift']:.0%}", f"site visits from the best email ({s['customers'] / 1000:.0f}K "
+                                                         "customers)"),
+                "visual": bars("Estimated campaign profit", [
+                    ("Email everyone", 1.0, "baseline", False),
+                    ("Target with the uplift model", 1 + s["profit_gain"], f"+{s['profit_gain']:.0%}", True)]),
+                "footer": "Analysis reruns on every push"}
     if key == "flights":
-        return ([(f"{s['flights'] / 1e6:.1f}M", "U.S. flights loaded into Delta Lake tables"),
-                 (f"{s['late_after_60']:.0%}", "of next flights leave late after a 60+ min late arrival")],
-                f"Airflow loads new months weekly · data through {month(s['data_end'])}")
+        return {"headline": (f"{s['late_after_60']:.0%}", "of next flights leave late after a 60+ min late arrival"),
+                "visual": ("pipeline", "Delta Lake medallion layers",
+                           [("Bronze", "raw files"), ("Silver", f"{s['flights'] / 1e6:.1f}M rows"),
+                            ("Gold", f"{s.get('gold_tables', 10)} tables")]),
+                "footer": f"Airflow loads new months weekly · data through {month(s['data_end'])}"}
     if key == "chicago311":
-        return ([(f"{s['warehouse'] / 1e6:.1f}M", f"requests in the warehouse ({s['requests_12m'] / 1000:.0f}K "
-                                                 "in the last year)"),
-                 (f"{s['median_days']:.1f} days", "median time to close a service request")],
-                f"Loads new data and runs {s['tests']} dbt tests daily")
+        return {"headline": (f"{s['median_days']:.1f} days", "median time to close a service request"
+                             + (f" ({s['within_7d']:.0%} within a week)" if s.get("within_7d") else "")),
+                "visual": ("pipeline", "dbt warehouse, loaded daily",
+                           [("Raw", f"{s['warehouse'] / 1e6:.1f}M rows"), ("Models", f"{s.get('models', 16)} in dbt"),
+                            ("Tests", f"{s['tests']} checks")]),
+                "footer": f"{s['requests_12m'] / 1000:.0f}K requests in the last year · data through "
+                          f"{fmt_date(s['data_end'])}"}
     if key == "community":
-        return ([(f"{s['came_back']:.0%}", "of newcomers come back within 30 days"),
-                 (f"+{s['fast_answer_pts'] * 100:.1f} pts", "return rate when the first question is answered "
-                                                            "within 24 h")],
-                f"{s['contributions'] / 1e6:.1f}M contributions · data through {month(s['data_end'])}")
+        if s.get("fast_yes") is not None:
+            visual = bars("Came back within 30 days", [
+                ("First question answered within 24 h", s["fast_yes"], f"{s['fast_yes']:.0%}", True),
+                ("Not answered within 24 h", s["fast_no"], f"{s['fast_no']:.0%}", False)])
+        else:
+            visual = bars("Came back within 30 days", [("All newcomers", s["came_back"], f"{s['came_back']:.0%}", True)])
+        return {"headline": (f"{s['came_back']:.0%}", "of newcomers come back within 30 days"),
+                "visual": visual,
+                "footer": f"{s['contributions'] / 1e6:.1f}M contributions · data through {month(s['data_end'])}"}
     if key == "citibike":
-        return ([(f"{s['wape']:.1%}", "forecast error (WAPE), 30 days ahead"),
-                 (f"−{s['error_cut']:.0%}", "error vs. the best statistical baseline")],
-                f"Retrains monthly · data through {fmt_date(s['data_end'])}")
+        fc = s.get("forecast")
+        if fc and fc.get("yhat"):
+            d0, d1 = (datetime.strptime(fc["dates"][i], "%Y-%m-%d") for i in (0, -1))
+            visual = ("line", "Next 30 days, rides per day",
+                      {"y": fc["yhat"], "lo": fc["lo"], "hi": fc["hi"], "start": f"{d0:%b %-d}", "end": f"{d1:%b %-d}",
+                       "peak": None})  # fmt: skip
+        else:
+            base = s["wape"] / (1 - s["error_cut"])
+            visual = bars("Forecast error (WAPE)", [("LightGBM model", s["wape"], f"{s['wape']:.1%}", True),
+                                                    ("Best statistical baseline", base, f"{base:.1%}", False)])
+        return {"headline": (f"{s['wape']:.1%}", f"forecast error (WAPE) 30 days ahead, {s['error_cut']:.0%} below "
+                                                 "the best statistical baseline"),
+                "visual": visual,
+                "footer": f"Retrains monthly · data through {fmt_date(s['data_end'])}"}
     raise KeyError(key)
 
 
@@ -365,8 +475,147 @@ def fit(text: str, size: float, max_width: float, max_lines: int) -> list[str]:
     return lines
 
 
-def project_card(th: dict, *, tag, color, title, blurb, stats, chips, footer, live=True) -> str:
-    """Half-width card (two per row): tag, title, the business question, two live numbers, tools, freshness."""
+def caption(th, x, y, text, w):
+    """Small uppercase label above a visual; shortened with an ellipsis if it would run past the card."""
+    text = text.upper()
+
+    def width(s):
+        return text_width(s, 9.5, bold=True) + 0.4 * len(s)
+
+    if width(text) > w:
+        while text and width(text + "…") > w:
+            text = text[:-1]
+        text = text.rstrip(" ,·") + "…"
+    return t(x, y, text, 9.5, th["muted"], bold=True, extra=' letter-spacing="0.4"')
+
+
+def v_bars(th, x, y, w, cap, rows):
+    """Horizontal bars from zero: the project's result in the accent blue, the comparison in a neutral tone."""
+    parts = [caption(th, x, y + 9, cap, w)]
+    vmax = max(r[1] for r in rows) or 1
+    span = w - 46
+    for i, (label, value, text, hi) in enumerate(rows):
+        ly = y + 27 + i * 25
+        parts.append(t(x, ly, fit(label, 10.5, w, 1)[0], 10.5, th["muted"]))
+        bw = max(3.0, value / vmax * span)
+        parts.append(f'<rect x="{x}" y="{ly + 5}" width="{bw:.1f}" height="8" rx="2" '
+                     f'fill="{th["blue"] if hi else th["base"]}"/>')
+        parts.append(t(x + bw + 6, ly + 12.5, text, 11, th["ink"], bold=True))
+    return "".join(parts)
+
+
+def v_line(th, x, y, w, cap, d):
+    """A forecast: the central line with its uncertainty band, start and end labels, optional peak marker."""
+    parts = [caption(th, x, y + 9, cap, w)]
+    ys, lo, hi = d["y"], d.get("lo") or d["y"], d.get("hi") or d["y"]
+    top, h = y + 22, 36
+    vmin, vmax = min(lo), max(hi)
+    rng = (vmax - vmin) or 1
+    n = len(ys)
+
+    def px(i):
+        return x + i * w / (n - 1)
+
+    def py(v):
+        return top + h - (v - vmin) / rng * h
+
+    band = [f"{px(i):.1f},{py(v):.1f}" for i, v in enumerate(hi)] + \
+           [f"{px(i):.1f},{py(v):.1f}" for i, v in reversed(list(enumerate(lo)))]
+    parts.append(f'<polygon points="{" ".join(band)}" fill="{th["blue"]}" fill-opacity="0.18"/>')
+    line = " ".join(f"{px(i):.1f},{py(v):.1f}" for i, v in enumerate(ys))
+    parts.append(f'<polyline points="{line}" fill="none" stroke="{th["blue"]}" stroke-width="2" '
+                 'stroke-linejoin="round" stroke-linecap="round"/>')
+    parts.append(f'<line x1="{x}" x2="{x + w}" y1="{top + h + 3}" y2="{top + h + 3}" stroke="{th["border"]}"/>')
+    parts.append(t(x, top + h + 16, d["start"], 10, th["muted"]))
+    parts.append(t(x + w, top + h + 16, d["end"], 10, th["muted"], anchor="end"))
+    if d.get("peak"):
+        i = max(range(n), key=lambda k: ys[k])
+        parts.append(f'<circle cx="{px(i):.1f}" cy="{py(ys[i]):.1f}" r="3.5" fill="{th["blue"]}" '
+                     f'stroke="{th["card"]}" stroke-width="2"/>')
+        parts.append(t(x + w / 2, top + h + 16, d["peak"](i, ys[i]), 10, th["ink"], anchor="middle"))
+    return "".join(parts)
+
+
+def v_split(th, x, y, w, cap, share, left, right):
+    """One 100% bar split in two, with the two parts labeled underneath."""
+    parts = [caption(th, x, y + 9, cap, w)]
+    lw = max(4.0, w * share - 1)
+    parts.append(f'<rect x="{x}" y="{y + 19}" width="{lw:.1f}" height="12" rx="2" fill="{th["blue"]}"/>')
+    parts.append(f'<rect x="{x + lw + 2:.1f}" y="{y + 19}" width="{max(0.0, w - lw - 2):.1f}" height="12" rx="2" '
+                 f'fill="{th["base"]}"/>')
+    for j, line in enumerate(left):
+        parts.append(t(x, y + 47 + 14 * j, line, 11 if j == 0 else 10.5, th["ink" if j == 0 else "muted"], bold=j == 0))
+    for j, line in enumerate(right):
+        parts.append(t(x + w, y + 47 + 14 * j, line, 11 if j == 0 else 10.5, th["ink" if j == 0 else "muted"],
+                       bold=j == 0, anchor="end"))
+    return "".join(parts)
+
+
+def v_odds(th, x, y, w, cap, raw, adj):
+    """Odds ratio before and after controls, on a scale starting at 1x (equal odds)."""
+    parts = [caption(th, x, y + 9, cap, w)]
+    lo, hi = 1.0, max(raw, adj, 1.5) * 1.08
+    ax = y + 42
+
+    def px(v):
+        return x + 6 + (v - lo) / (hi - lo) * (w - 12)
+
+    parts.append(f'<line x1="{x}" x2="{x + w}" y1="{ax}" y2="{ax}" stroke="{th["border"]}"/>')
+    parts.append(f'<line x1="{px(1):.1f}" x2="{px(1):.1f}" y1="{ax - 6}" y2="{ax + 6}" stroke="{th["muted"]}"/>')
+    parts.append(t(px(1), ax - 11, "1× = equal", 10, th["muted"]))
+    parts.append(f'<line x1="{px(adj):.1f}" x2="{px(raw):.1f}" y1="{ax}" y2="{ax}" stroke="{th["base"]}" '
+                 'stroke-width="3"/>')
+    for v, color in ((raw, th["base"]), (adj, th["blue"])):
+        parts.append(f'<circle cx="{px(v):.1f}" cy="{ax}" r="5.5" fill="{color}" stroke="{th["card"]}" '
+                     'stroke-width="2"/>')
+
+    def centered(cx, text, size, bold=False):  # centered on the dot, kept inside the visual
+        half = text_width(text, size, bold) / 2
+        return min(max(cx, x + half), x + w - half)
+
+    raw_txt, adj_txt = f"{raw:.1f}× unadjusted", f"{adj:.1f}× after credit factors"
+    parts.append(t(centered(px(raw), raw_txt, 10.5), ax - 11, raw_txt, 10.5, th["muted"], anchor="middle"))
+    parts.append(t(centered(px(adj), adj_txt, 10.5, True), ax + 21, adj_txt, 10.5, th["ink"], bold=True,
+                   anchor="middle"))
+    return "".join(parts)
+
+
+def v_pipeline(th, x, y, w, cap, stages):
+    """Boxes and arrows: the layers data moves through, with live sizes."""
+    parts = [caption(th, x, y + 9, cap, w)]
+    gap = 12
+    bw = (w - gap * (len(stages) - 1)) / len(stages)
+    for i, (name, detail) in enumerate(stages):
+        bx = x + i * (bw + gap)
+        last = i == len(stages) - 1
+        parts.append(f'<rect x="{bx:.1f}" y="{y + 18}" width="{bw:.1f}" height="42" rx="7" fill="{th["chip"]}" '
+                     f'stroke="{th["blue"] if last else th["chip_border"]}"/>')
+        parts.append(t(bx + bw / 2, y + 35, name, 11, th["ink"], bold=True, anchor="middle"))
+        parts.append(t(bx + bw / 2, y + 50, fit(detail, 10, bw - 6, 1)[0], 10, th["muted"], anchor="middle"))
+        if not last:
+            ax = bx + bw + 2
+            parts.append(f'<path d="M{ax:.1f} {y + 39}h{gap - 6}" stroke="{th["muted"]}" stroke-width="1.5"/>'
+                         f'<path d="M{ax + gap - 7:.1f} {y + 35.5}l4 3.5-4 3.5z" fill="{th["muted"]}"/>')
+    return "".join(parts)
+
+
+def v_map(th, x, y, w, cap):
+    """Manhattan (north to the right) with the toll zone highlighted."""
+    k = w / MAP_W
+    parts = [caption(th, x, y + 9, cap, w),
+             f'<g transform="translate({x} {y + 17}) scale({k:.4f})">'
+             f'<path d="{MANHATTAN}" fill="{th["base"]}"/><path d="{TOLL_ZONE}" fill="{th["blue"]}"/></g>',
+             t(x, y + 17 + MAP_H * k + 13, "south of 60th St", 10, th["muted"]),
+             t(x + w, y + 17 + MAP_H * k + 13, "north →", 10, th["muted"], anchor="end")]
+    return "".join(parts)
+
+
+VISUALS = {"bars": v_bars, "line": v_line, "split": v_split, "odds": v_odds, "pipeline": v_pipeline, "map": v_map}
+
+
+def project_card(th: dict, *, tag, color, title, blurb, headline, visual, chips, footer, live=True) -> str:
+    """Half-width card (two per row): tag, title, the business question, one live number with a small visual that
+    fits the project, tools, freshness. Every card has the same frame, so the grid lines up."""
     W, H, P = CARD_W, CARD_H, 22
     inner = W - 2 * P
     parts = [f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="14" fill="{th["card"]}" '
@@ -394,16 +643,17 @@ def project_card(th: dict, *, tag, color, title, blurb, stats, chips, footer, li
     for line in blurb_lines:
         parts.append(t(P, y, line, 12.5, th["muted"]))
         y += 17
-    # two numbers side by side, anchored to the bottom so every card lines up
+    # bottom block, anchored to the bottom so every card lines up: headline number left, visual right
     top = H - P - 128
     parts.append(f'<line x1="{P}" x2="{W - P}" y1="{top - 10}" y2="{top - 10}" stroke="{th["border"]}"/>')
-    col = inner / 2
-    for i, (value, label) in enumerate(stats):
-        x = P + col * i + (10 if i else 0)
-        parts.append(t(x, top + 22, value, 25, th["blue" if i == 0 else "orange"], bold=True))
-        lines = fit(label, 11.5, col - 14, max_lines=2)
-        for j, line in enumerate(lines):
-            parts.append(t(x, top + 42 + 15 * j, line, 11.5, th["muted"]))
+    left_w = 168
+    value, label = headline
+    parts.append(t(P, top + 22, value, 27, th["ink"], bold=True))
+    for j, line in enumerate(fit(label, 11.5, left_w - 8, max_lines=3)):
+        parts.append(t(P, top + 42 + 15 * j, line, 11.5, th["muted"]))
+    vx = P + left_w + 14
+    kind, cap, *args = visual
+    parts.append(VISUALS[kind](th, vx, top - 2, W - P - vx, cap, *args))
     cx = P
     for c in chips:
         s, w = chip(cx, H - P - 42, c, th, size=11, h=22)
@@ -412,7 +662,7 @@ def project_card(th: dict, *, tag, color, title, blurb, stats, chips, footer, li
         parts.append(s)
         cx += w + 6
     parts.append(t(P, H - P + 1, fit(footer, 11, inner, max_lines=1)[0], 11, th["muted"]))
-    return svg(W, H, "".join(parts), f"{title}: {stats[0][0]} {stats[0][1]}; {stats[1][0]} {stats[1][1]}")
+    return svg(W, H, "".join(parts), f"{title}: {value} {label}")
 
 
 def toolkit(th: dict) -> str:
@@ -476,11 +726,11 @@ def build(stats: dict) -> None:
     for p in PROJECTS:
         if p["key"] not in stats:
             raise KeyError(f"no numbers for {p['key']} (not fetched and not in data/latest.json)")
-        numbers, footer = card_numbers(p["key"], stats[p["key"]])
+        content = card_content(p["key"], stats[p["key"]])
         c = p["card"]
         name = f"card-{p['key']}.svg"
         (ASSETS / name).write_text(project_card(th, tag=c["tag"], color=c["color"], title=c["title"],
-                                                blurb=c["blurb"], stats=numbers, chips=c["chips"], footer=footer))
+                                                blurb=c["blurb"], chips=c["chips"], **content))
         keep.add(name)
     (ASSETS / "toolkit.svg").write_text(toolkit(th))
     for old in ASSETS.glob("*.svg"):  # cards of projects no longer listed
